@@ -17,13 +17,6 @@ namespace cmsaddcomputer
         private const string CSRF_CMS_RECEIVE_PROP_NAME = "csrf";
         private const string COMPUTER_ID_CMS_RECEIVE_PROP_NAME = "computerid";
 
-        private static readonly string[,] OPERATING_SYSTEM_CONSTANTS_SEARCH = { { "2003", "WS03" }, { "2008", "WS08" }, { "2011", "WS08" },
-            { "2012", "WS12" }, { "2016", "WS16" }, {"2019", "WS19" }, {"xp", "WXP" }, {"7", "W7" }, {"8.1", "W8" }, {"8", "W8" },
-            {"10", "W10" } };
-
-        private static readonly string[,] MANUFACTURER_CONSTANTS_SEARCH = { { "dell", "D" }, {"hp", "H" }, {"hewlett", "H"}, {"lenovo", "L"},
-            {"microsoft", "M"}, {"apple", "G" }, {"asus", "A" }, {"sony", "S" }, {"acer", "C" } };
-
         string _server_name = "";
         int _server_port = 443;
         string _api_key = "";
@@ -31,29 +24,6 @@ namespace cmsaddcomputer
         bool _use_https = true;
         UriBuilder uri_base = null;
         CookieContainer _cookieContainer = null;
-
-
-        static string convert_manufacturer(string manuf)
-        {
-            manuf = manuf.ToLower();
-            for (int i = 0; i < MANUFACTURER_CONSTANTS_SEARCH.GetLength(0); ++i)
-            {
-                if (manuf.IndexOf(MANUFACTURER_CONSTANTS_SEARCH[i, 0]) != -1)
-                    return MANUFACTURER_CONSTANTS_SEARCH[i, 1];
-            }
-            return "O";
-        }
-
-        static string get_os_version(string long_caption)
-        {
-            long_caption = long_caption.ToLower();
-            for (int i = 0; i < OPERATING_SYSTEM_CONSTANTS_SEARCH.GetLength(0); ++i)
-            {
-                if (long_caption.IndexOf(OPERATING_SYSTEM_CONSTANTS_SEARCH[i, 0]) != -1)
-                    return OPERATING_SYSTEM_CONSTANTS_SEARCH[i, 1];
-            }
-            return "WO";
-        }
 
         public CMSConnector(string api_key, string servername, int serverport = 443, bool https=true)
         {
@@ -63,8 +33,8 @@ namespace cmsaddcomputer
             _use_https = https;
             _cookieContainer = new CookieContainer();
             uri_base = new UriBuilder(_server_name);
-            uri_base.Port = _server_port;
-            uri_base.Scheme = _use_https ? "https" : "http";
+            //uri_base.Port = _server_port;
+            //uri_base.Scheme = _use_https ? "https" : "http";
         }
 
         private bool GetCSRFToken(Dictionary<string, string> responseValues)
