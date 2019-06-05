@@ -23,6 +23,7 @@ namespace cmsaddcomputer
         string _csrf_token = "";
         bool _use_https = true;
         UriBuilder uri_base = null;
+        Uri baseUri = null;
         CookieContainer _cookieContainer = null;
 
         public CMSConnector(string api_key, string servername, int serverport = 443, bool https=true)
@@ -33,6 +34,7 @@ namespace cmsaddcomputer
             _use_https = https;
             _cookieContainer = new CookieContainer();
             uri_base = new UriBuilder(_server_name);
+            baseUri = uri_base.Uri;
             //uri_base.Port = _server_port;
             //uri_base.Scheme = _use_https ? "https" : "http";
         }
@@ -80,10 +82,10 @@ namespace cmsaddcomputer
             uri_base.Query = "";
             Uri uri = uri_base.Uri;
             uri_base.Path = "";
-            Dictionary<string, string> data = new Dictionary<string, string>(info);
-            data.Add(CSRF_CMS_SEND_PROP_NAME, _csrf_token);
-            data.Add(CMS_SECRET_KEY_PROP_NAME, _api_key);
             HttpStatusCode response_code;
+            Dictionary<string, string> data = new Dictionary<string, string>(info);
+            data.Add(CSRF_CMS_SEND_PROP_NAME, _cookieContainer.GetCookies(baseUri)["csrftoken"].Value);
+            data.Add(CMS_SECRET_KEY_PROP_NAME, _api_key);
             string response = SendPOSTJsonRequest(uri, data, out response_code, true);
             if (response_code != HttpStatusCode.OK)
             {
@@ -162,7 +164,15 @@ namespace cmsaddcomputer
                 return response_code_text;
             }
             if (save_cookies)
-                _cookieContainer.Add(response.Cookies);
+            {
+                for (int i = 0; i < response.Cookies.Count; i++)
+                {
+                    response.Cookies[i].Path = String.Empty;
+                }
+                uri_base.Path = "";
+                _cookieContainer = new CookieContainer();
+                _cookieContainer.Add(baseUri, response.Cookies);
+            }
             string responseText;
             using (var reader = new System.IO.StreamReader(response.GetResponseStream()))
             {
@@ -177,6 +187,7 @@ namespace cmsaddcomputer
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded; charset=utf-8";
             request.CookieContainer = _cookieContainer;
+            request.Referer = uri.ToString();
             NameValueCollection outgoingQueryString = HttpUtility.ParseQueryString(String.Empty);
             if (data != null)
             {
@@ -217,7 +228,15 @@ namespace cmsaddcomputer
                 return response_code_text;
             }
             if (save_cookies)
-                _cookieContainer.Add(response.Cookies);
+            {
+                for (int i = 0; i < response.Cookies.Count; i++)
+                {
+                    response.Cookies[i].Path = String.Empty;
+                }
+                uri_base.Path = "";
+                _cookieContainer = new CookieContainer();
+                _cookieContainer.Add(baseUri, response.Cookies);
+            }
             string responseText;
             using (var reader = new System.IO.StreamReader(response.GetResponseStream()))
             {

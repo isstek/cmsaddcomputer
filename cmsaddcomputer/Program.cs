@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Management;
+using System.Net;
 
 namespace cmsaddcomputer
 {
@@ -162,6 +163,8 @@ namespace cmsaddcomputer
 
         static void Main(string[] args)
         {
+            ServicePointManager.ServerCertificateValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+
             SettingsKeeper settings = new SettingsKeeper();
             CMSConnector connector = new CMSConnector(settings.Api_key, settings.Server_name, settings.Port, settings.Https);
             int result = connector.SendComputerInfo(settings.Client_uuid, GetComputerInfo());
